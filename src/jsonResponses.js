@@ -28,7 +28,28 @@ const getUsers = (request, response) => {
 };
 
 const addUser = (request, response) => {
-
+  responseJSON = {
+    message: "NAME and AGE are both required."
+  };
+  const { name, age } = request.body;
+  if(!name || !age) {
+    responseJSON.id = 'Missing Params';
+    return respondJSON(request, response, 400, responseJSON);
+  }
+  let statusCode = 204;
+  if(!users[name]) {
+    statusCode = 201;
+    users[name] = {
+      name: name
+    };
+  }
+  users[name].age = age;
+  if (statusCode === 201) {
+    responseJSON.message = "User created";
+    return respondJSON(request, response, statusCode, responseJSON);
+  }
+  return respondJSON(request, response, statusCode, {});
+  console.log(name, age);
 };
 
 module.exports = {
