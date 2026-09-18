@@ -42,10 +42,22 @@ const parseBody = (request,response,handler) => {
     // We now have the string "name=jp&age=40"
     const bodyString = Buffer.concat(body).toString();
 
-    // Turn that text into an object and hang it on the request.
-    // Nothing builds request.body for us, so this is the line that creates it.
-    // Leave it out and addUser dies with "Cannot destructure property 'name' of 'request.body'"
-    request.body = query.parse(bodyString);
+    const type = request.headers['content-type'];
+    // Parse url encoded string!
+    if(type === 'application/x-www-form-urlencoded') {
+
+      // Turn that text into an object and hang it on the request.
+      // Nothing builds request.body for us, so this is the line that creates it.
+      // Leave it out and addUser dies with "Cannot destructure property 'name' of 'request.body'"
+      request.body = query.parse(bodyString);
+
+    }else if(type === 'application/json') {
+      request.body = JSON.parse(bodyString);
+    }else {
+      response.writeHead(400, {'Content-Type':'application/json'});
+      response.write(JSON.stringify({message: 'yikes'}));
+      response.end();
+    }
 
     // The body is ready, so now it is safe to run the real handler.
     // Leave this out and the request just spins forever, because nothing ever responds.
